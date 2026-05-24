@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NexusCRM – Lead Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<div class="grain"></div>
+<div class="mesh"></div>
+<div class="app" id="app">
+
+  <!-- ═══════════════════════════ SIDEBAR ═══════════════════════════ -->
+  <aside class="sidebar">
+    <div class="logo-area">
+      <div class="logo">
+        <div class="logo-icon">⚡</div>
+        <div>
+          NexusCRM
+          <div class="logo-tag">Lead Intelligence</div>
+        </div>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Navigation</div>
+      <div class="nav-item active" onclick="setView('leads')">
+        <span class="nav-icon">📋</span> Pipeline
+        <span class="nav-badge" id="total-badge">0</span>
+      </div>
+      <div class="nav-item" onclick="setView('analytics')">
+        <span class="nav-icon">📊</span> Analytics
+      </div>
+      <div class="nav-item" onclick="setView('contacts')">
+        <span class="nav-icon">👥</span> Contacts
+      </div>
+      <div class="nav-item" onclick="setView('settings')">
+        <span class="nav-icon">⚙️</span> Settings
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="avatar">AD</div>
+        <div class="user-info">
+          <div class="user-name">Admin User</div>
+          <div class="user-role">Super Admin</div>
+        </div>
+        <span style="font-size:16px;color:var(--text3);cursor:pointer">⋯</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══════════════════════════ MAIN ═══════════════════════════ -->
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <div class="page-title">Lead Pipeline</div>
+        <div class="page-sub">Track, manage, and convert your leads</div>
+      </div>
+      <div class="topbar-actions">
+        <div class="search-bar">
+          <span style="color:var(--text3);font-size:15px">🔍</span>
+          <input type="text" id="search-input" placeholder="Search leads…" oninput="applyFilters()"/>
+        </div>
+        <button class="btn btn-ghost" onclick="exportCSV()">⬇ Export</button>
+        <button class="btn btn-primary" onclick="openAddModal()">＋ Add Lead</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- Stats Cards -->
+      <div class="stats-grid" id="stats-grid"></div>
+
+      <!-- Filter Row -->
+      <div class="filter-row" id="filter-row">
+        <button class="filter-chip active" onclick="setFilter('all',this)">All Leads</button>
+        <button class="filter-chip" onclick="setFilter('new',this)">🔵 New</button>
+        <button class="filter-chip" onclick="setFilter('contacted',this)">🟡 Contacted</button>
+        <button class="filter-chip" onclick="setFilter('converted',this)">🟢 Converted</button>
+        <button class="filter-chip" onclick="setFilter('lost',this)">🔴 Lost</button>
+        <div class="filter-right">
+          <button class="sort-btn" onclick="cycleSort()">
+            ⬍ Sort: <span id="sort-label">Newest</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Leads Table -->
+      <div class="leads-table">
+        <div class="table-head">
+          <span class="th">Lead</span>
+          <span class="th">Contact</span>
+          <span class="th">Source</span>
+          <span class="th">Status</span>
+          <span class="th">Score</span>
+          <span class="th">Added</span>
+          <span class="th"></span>
+        </div>
+        <div id="leads-body"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ═══════════════════════════ ADD / EDIT MODAL ═══════════════════════════ -->
+<div id="form-modal" style="display:none" class="modal-bg" onclick="closeOnBg(event,'form-modal')">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title" id="modal-title">Add New Lead</div>
+        <div class="modal-sub"  id="modal-sub">Fill in the lead details below</div>
+      </div>
+      <button class="close-btn" onclick="closeModal('form-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Full Name *</label>
+          <input class="form-input" id="f-name" placeholder="e.g. Riya Sharma"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Company</label>
+          <input class="form-input" id="f-company" placeholder="e.g. Acme Corp"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email *</label>
+          <input class="form-input" id="f-email" type="email" placeholder="riya@example.com"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone</label>
+          <input class="form-input" id="f-phone" placeholder="+91 99999 00000"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Source</label>
+          <select class="form-input" id="f-source">
+            <option>Contact Form</option>
+            <option>LinkedIn</option>
+            <option>Referral</option>
+            <option>Cold Email</option>
+            <option>Website Chat</option>
+            <option>Advertisement</option>
+            <option>Event</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select class="form-input" id="f-status">
+            <option value="new">New</option>
+            <option value="contacted">Contacted</option>
+            <option value="converted">Converted</option>
+            <option value="lost">Lost</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Initial Note</label>
+          <textarea class="form-input" id="f-note" placeholder="Any context or notes about this lead…"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('form-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveLead()">Save Lead</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ DETAIL MODAL ═══════════════════════════ -->
+<div id="detail-modal" style="display:none" class="modal-bg" onclick="closeOnBg(event,'detail-modal')">
+  <div class="modal" id="detail-content"></div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

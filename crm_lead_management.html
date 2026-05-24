@@ -1,0 +1,527 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NexusCRM</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1117;--bg2:#181c27;--bg3:#1e2333;--bg4:#242a3e;
+  --border:#2a3148;--border2:#344060;
+  --accent:#6c63ff;--accent2:#8b85ff;--accent3:#4f46e5;
+  --gold:#f59e0b;--gold2:#fbbf24;
+  --green:#10b981;--green2:#34d399;
+  --coral:#f43f5e;--coral2:#fb7185;
+  --blue:#3b82f6;--blue2:#60a5fa;
+  --teal:#14b8a6;--teal2:#2dd4bf;
+  --text:#e8eaf6;--text2:#9ba3c4;--text3:#6b74a0;
+  --serif:'DM Serif Display',serif;
+  --sans:'DM Sans',sans-serif;
+  --shadow:0 4px 24px rgba(0,0,0,.45);
+  --shadow2:0 2px 8px rgba(0,0,0,.3);
+}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+.grain{position:fixed;inset:0;pointer-events:none;z-index:999;opacity:.035;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")}
+.mesh{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.mesh::before{content:'';position:absolute;width:900px;height:900px;background:radial-gradient(circle,rgba(108,99,255,.12) 0%,transparent 65%);top:-300px;right:-200px;border-radius:50%}
+.mesh::after{content:'';position:absolute;width:700px;height:700px;background:radial-gradient(circle,rgba(20,184,166,.08) 0%,transparent 65%);bottom:-200px;left:-100px;border-radius:50%}
+.app{display:grid;grid-template-columns:260px 1fr;min-height:100vh;position:relative;z-index:1}
+
+/* SIDEBAR */
+.sidebar{background:linear-gradient(180deg,var(--bg2) 0%,var(--bg) 100%);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:0}
+.logo-area{padding:28px 24px 20px;border-bottom:1px solid var(--border)}
+.logo{font-family:var(--serif);font-size:22px;color:#fff;letter-spacing:-.3px;display:flex;align-items:center;gap:10px}
+.logo-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--accent),var(--teal));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.logo-tag{font-family:var(--sans);font-size:11px;color:var(--text3);font-weight:400;letter-spacing:.5px;text-transform:uppercase;margin-top:4px}
+.sidebar-section{padding:20px 14px 8px;flex:1}
+.sidebar-label{font-size:10px;font-weight:600;color:var(--text3);letter-spacing:1.2px;text-transform:uppercase;padding:0 10px;margin-bottom:8px}
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:10px;cursor:pointer;transition:all .2s;font-size:14px;font-weight:400;color:var(--text2);margin-bottom:2px;position:relative}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.active{background:linear-gradient(135deg,rgba(108,99,255,.18),rgba(108,99,255,.08));color:#fff;font-weight:500}
+.nav-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:20px;background:var(--accent2);border-radius:0 3px 3px 0}
+.nav-icon{font-size:18px;width:22px;text-align:center;flex-shrink:0}
+.nav-badge{margin-left:auto;background:var(--accent3);color:#fff;font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;min-width:20px;text-align:center}
+.sidebar-footer{padding:16px 14px;border-top:1px solid var(--border)}
+.user-card{display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg3);border-radius:12px;border:1px solid var(--border)}
+.avatar{width:36px;height:36px;background:linear-gradient(135deg,var(--accent),var(--coral));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#fff;flex-shrink:0}
+.user-info{flex:1;overflow:hidden}
+.user-name{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-role{font-size:11px;color:var(--text3)}
+
+/* MAIN */
+.main{display:flex;flex-direction:column;overflow:hidden}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:22px 32px 16px;border-bottom:1px solid var(--border);background:rgba(15,17,23,.6);backdrop-filter:blur(12px);position:sticky;top:0;z-index:10}
+.page-title{font-family:var(--serif);font-size:26px;color:#fff;letter-spacing:-.3px}
+.page-sub{font-size:13px;color:var(--text3);margin-top:2px}
+.topbar-actions{display:flex;align-items:center;gap:10px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:9px 18px;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .2s;font-family:var(--sans)}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;box-shadow:0 4px 14px rgba(108,99,255,.3)}
+.btn-primary:hover{opacity:.88;transform:translateY(-1px);box-shadow:0 6px 20px rgba(108,99,255,.4)}
+.btn-ghost{background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
+.btn-ghost:hover{background:var(--bg4);color:var(--text);border-color:var(--border2)}
+.search-bar{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:8px 14px;min-width:220px;transition:border-color .2s}
+.search-bar:focus-within{border-color:var(--accent)}
+.search-bar input{background:none;border:none;outline:none;font-size:13px;color:var(--text);font-family:var(--sans);width:100%}
+.search-bar input::placeholder{color:var(--text3)}
+.content{flex:1;padding:28px 32px;overflow-y:auto}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:20px;position:relative;overflow:hidden;transition:all .25s;cursor:default}
+.stat-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:var(--shadow)}
+.stat-card::before{content:'';position:absolute;top:-30px;right:-30px;width:100px;height:100px;border-radius:50%;opacity:.06}
+.stat-card.purple::before{background:var(--accent)}
+.stat-card.green::before{background:var(--green)}
+.stat-card.gold::before{background:var(--gold)}
+.stat-card.coral::before{background:var(--coral)}
+.stat-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.stat-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.stat-icon.purple{background:rgba(108,99,255,.15);color:var(--accent2)}
+.stat-icon.green{background:rgba(16,185,129,.12);color:var(--green2)}
+.stat-icon.gold{background:rgba(245,158,11,.12);color:var(--gold2)}
+.stat-icon.coral{background:rgba(244,63,94,.12);color:var(--coral2)}
+.stat-delta{font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px}
+.delta-up{background:rgba(16,185,129,.12);color:var(--green2)}
+.delta-down{background:rgba(244,63,94,.12);color:var(--coral2)}
+.stat-num{font-family:var(--serif);font-size:32px;color:#fff;letter-spacing:-.5px}
+.stat-label{font-size:12px;color:var(--text3);margin-top:4px;font-weight:400}
+
+/* FILTER ROW */
+.filter-row{display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.filter-chip{padding:7px 16px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text2);transition:all .2s;font-family:var(--sans)}
+.filter-chip:hover{border-color:var(--border2);color:var(--text)}
+.filter-chip.active{background:linear-gradient(135deg,rgba(108,99,255,.2),rgba(108,99,255,.08));border-color:rgba(108,99,255,.5);color:var(--accent2)}
+.filter-right{margin-left:auto;display:flex;gap:8px}
+.sort-btn{display:flex;align-items:center;gap:6px;padding:7px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;font-size:12px;color:var(--text2);cursor:pointer;font-family:var(--sans);transition:all .2s}
+.sort-btn:hover{background:var(--bg4);color:var(--text)}
+
+/* LEADS TABLE */
+.leads-table{background:var(--bg2);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+.table-head{display:grid;grid-template-columns:2fr 1.8fr 1.2fr 1.3fr 1.3fr 120px 60px;gap:0;padding:14px 20px;border-bottom:1px solid var(--border);background:rgba(30,35,51,.5)}
+.th{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.8px}
+.lead-row{display:grid;grid-template-columns:2fr 1.8fr 1.2fr 1.3fr 1.3fr 120px 60px;gap:0;padding:14px 20px;border-bottom:1px solid var(--border);transition:all .2s;cursor:pointer;align-items:center}
+.lead-row:last-child{border-bottom:none}
+.lead-row:hover{background:rgba(108,99,255,.06)}
+.lead-name{display:flex;align-items:center;gap:10px}
+.lead-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#fff;flex-shrink:0}
+.lead-name-text{font-size:14px;font-weight:500;color:var(--text)}
+.lead-email{font-size:11px;color:var(--text3);margin-top:2px}
+.lead-company{font-size:13px;color:var(--text2)}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.badge-new{background:rgba(59,130,246,.12);color:var(--blue2)}.badge-new::before{background:var(--blue2)}
+.badge-contacted{background:rgba(245,158,11,.1);color:var(--gold2)}.badge-contacted::before{background:var(--gold2)}
+.badge-converted{background:rgba(16,185,129,.1);color:var(--green2)}.badge-converted::before{background:var(--green2)}
+.badge-lost{background:rgba(244,63,94,.1);color:var(--coral2)}.badge-lost::before{background:var(--coral2)}
+.source-tag{font-size:11px;color:var(--text3);background:var(--bg3);padding:3px 8px;border-radius:6px;display:inline-block;border:1px solid var(--border)}
+.score-bar{display:flex;align-items:center;gap:8px}
+.score-track{flex:1;height:4px;background:var(--bg4);border-radius:2px;overflow:hidden}
+.score-fill{height:100%;border-radius:2px;transition:width .3s}
+.score-num{font-size:11px;color:var(--text3);min-width:24px;text-align:right}
+.action-btns{display:flex;gap:4px}
+.icon-btn{width:28px;height:28px;border-radius:7px;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;transition:all .2s;color:var(--text3)}
+.icon-btn:hover{background:var(--accent3);border-color:var(--accent);color:#fff}
+.date-cell{font-size:12px;color:var(--text3)}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);animation:fadein .2s ease}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:20px;width:580px;max-height:88vh;overflow-y:auto;box-shadow:0 20px 80px rgba(0,0,0,.6);animation:slidein .25s ease}
+@keyframes slidein{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-head{padding:24px 28px 0;display:flex;align-items:flex-start;justify-content:space-between}
+.modal-title{font-family:var(--serif);font-size:22px;color:#fff}
+.modal-sub{font-size:13px;color:var(--text3);margin-top:4px}
+.close-btn{width:32px;height:32px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--text2);transition:all .2s;flex-shrink:0}
+.close-btn:hover{background:var(--coral);color:#fff;border-color:var(--coral)}
+.modal-body{padding:24px 28px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group.full{grid-column:1/-1}
+.form-label{font-size:12px;font-weight:500;color:var(--text2);letter-spacing:.3px}
+.form-input{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--text);font-family:var(--sans);outline:none;transition:border-color .2s;width:100%}
+.form-input:focus{border-color:var(--accent)}
+.form-input::placeholder{color:var(--text3)}
+select.form-input{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b74a0' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+option{background:var(--bg2)}
+textarea.form-input{resize:vertical;min-height:80px;line-height:1.5}
+.modal-footer{padding:0 28px 24px;display:flex;gap:10px;justify-content:flex-end}
+
+/* DETAIL PANEL */
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.detail-item{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.detail-label{font-size:11px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+.detail-value{font-size:13px;color:var(--text);font-weight:500}
+.notes-list{display:flex;flex-direction:column;gap:10px;margin-bottom:16px;max-height:200px;overflow-y:auto}
+.note-item{background:var(--bg3);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:10px 14px}
+.note-date{font-size:11px;color:var(--text3);margin-bottom:4px}
+.note-text{font-size:13px;color:var(--text2);line-height:1.5}
+.status-select-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.status-opt{padding:8px 16px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:2px solid transparent;transition:all .2s}
+.status-opt.new{border-color:rgba(59,130,246,.3);color:var(--blue2)}
+.status-opt.new.sel,.status-opt.new:hover{background:rgba(59,130,246,.15);border-color:var(--blue2)}
+.status-opt.contacted{border-color:rgba(245,158,11,.3);color:var(--gold2)}
+.status-opt.contacted.sel,.status-opt.contacted:hover{background:rgba(245,158,11,.12);border-color:var(--gold2)}
+.status-opt.converted{border-color:rgba(16,185,129,.3);color:var(--green2)}
+.status-opt.converted.sel,.status-opt.converted:hover{background:rgba(16,185,129,.12);border-color:var(--green2)}
+.status-opt.lost{border-color:rgba(244,63,94,.3);color:var(--coral2)}
+.status-opt.lost.sel,.status-opt.lost:hover{background:rgba(244,63,94,.12);border-color:var(--coral2)}
+.section-label{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px}
+.activity-timeline{display:flex;flex-direction:column;gap:8px;max-height:150px;overflow-y:auto}
+.timeline-item{display:flex;gap:12px;align-items:flex-start}
+.timeline-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:5px}
+.timeline-text{font-size:12px;color:var(--text2)}
+.timeline-time{font-size:11px;color:var(--text3)}
+.empty-state{text-align:center;padding:60px 20px;color:var(--text3)}
+.empty-icon{font-size:48px;margin-bottom:16px;opacity:.4}
+.empty-text{font-size:15px;margin-bottom:6px;color:var(--text2)}
+.empty-sub{font-size:13px}
+.toast{position:fixed;bottom:28px;right:28px;background:var(--bg3);border:1px solid var(--border2);border-radius:12px;padding:14px 20px;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text);z-index:200;box-shadow:var(--shadow);animation:toastin .3s ease}
+@keyframes toastin{from{transform:translateX(20px);opacity:0}to{transform:translateX(0);opacity:1}}
+.toast-icon{font-size:18px}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+<div class="mesh"></div>
+<div class="app" id="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo-area">
+      <div class="logo">
+        <div class="logo-icon">⚡</div>
+        <div>
+          NexusCRM
+          <div class="logo-tag">Lead Intelligence</div>
+        </div>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Navigation</div>
+      <div class="nav-item active" onclick="setView('leads')">
+        <span class="nav-icon">📋</span> Pipeline
+        <span class="nav-badge" id="total-badge">0</span>
+      </div>
+      <div class="nav-item" onclick="setView('analytics')">
+        <span class="nav-icon">📊</span> Analytics
+      </div>
+      <div class="nav-item" onclick="setView('contacts')">
+        <span class="nav-icon">👥</span> Contacts
+      </div>
+      <div class="nav-item" onclick="setView('settings')">
+        <span class="nav-icon">⚙️</span> Settings
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="avatar">AD</div>
+        <div class="user-info">
+          <div class="user-name">Admin User</div>
+          <div class="user-role">Super Admin</div>
+        </div>
+        <span style="font-size:16px;color:var(--text3);cursor:pointer">⋯</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <div class="page-title">Lead Pipeline</div>
+        <div class="page-sub">Track, manage, and convert your leads</div>
+      </div>
+      <div class="topbar-actions">
+        <div class="search-bar">
+          <span style="color:var(--text3);font-size:15px">🔍</span>
+          <input type="text" id="search-input" placeholder="Search leads…" oninput="applyFilters()"/>
+        </div>
+        <button class="btn btn-ghost" onclick="exportCSV()">⬇ Export</button>
+        <button class="btn btn-primary" onclick="openAddModal()">＋ Add Lead</button>
+      </div>
+    </div>
+    <div class="content">
+      <!-- STATS -->
+      <div class="stats-grid" id="stats-grid"></div>
+      <!-- FILTERS -->
+      <div class="filter-row" id="filter-row">
+        <button class="filter-chip active" onclick="setFilter('all',this)">All Leads</button>
+        <button class="filter-chip" onclick="setFilter('new',this)">🔵 New</button>
+        <button class="filter-chip" onclick="setFilter('contacted',this)">🟡 Contacted</button>
+        <button class="filter-chip" onclick="setFilter('converted',this)">🟢 Converted</button>
+        <button class="filter-chip" onclick="setFilter('lost',this)">🔴 Lost</button>
+        <div class="filter-right">
+          <button class="sort-btn" onclick="cycleSort()">⬍ Sort: <span id="sort-label">Newest</span></button>
+        </div>
+      </div>
+      <!-- TABLE -->
+      <div class="leads-table">
+        <div class="table-head">
+          <span class="th">Lead</span>
+          <span class="th">Contact</span>
+          <span class="th">Source</span>
+          <span class="th">Status</span>
+          <span class="th">Score</span>
+          <span class="th">Added</span>
+          <span class="th"></span>
+        </div>
+        <div id="leads-body"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ADD/EDIT MODAL -->
+<div id="form-modal" style="display:none" class="modal-bg" onclick="closeOnBg(event,'form-modal')">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title" id="modal-title">Add New Lead</div>
+        <div class="modal-sub" id="modal-sub">Fill in the lead details below</div>
+      </div>
+      <button class="close-btn" onclick="closeModal('form-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Full Name *</label><input class="form-input" id="f-name" placeholder="e.g. Riya Sharma" /></div>
+        <div class="form-group"><label class="form-label">Company</label><input class="form-input" id="f-company" placeholder="e.g. Acme Corp" /></div>
+        <div class="form-group"><label class="form-label">Email *</label><input class="form-input" id="f-email" type="email" placeholder="riya@example.com" /></div>
+        <div class="form-group"><label class="form-label">Phone</label><input class="form-input" id="f-phone" placeholder="+91 99999 00000" /></div>
+        <div class="form-group"><label class="form-label">Source</label>
+          <select class="form-input" id="f-source">
+            <option>Contact Form</option><option>LinkedIn</option><option>Referral</option><option>Cold Email</option><option>Website Chat</option><option>Advertisement</option><option>Event</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Status</label>
+          <select class="form-input" id="f-status">
+            <option value="new">New</option><option value="contacted">Contacted</option><option value="converted">Converted</option><option value="lost">Lost</option>
+          </select>
+        </div>
+        <div class="form-group full"><label class="form-label">Initial Note</label><textarea class="form-input" id="f-note" placeholder="Any context or notes about this lead…"></textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('form-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveLead()">Save Lead</button>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div id="detail-modal" style="display:none" class="modal-bg" onclick="closeOnBg(event,'detail-modal')">
+  <div class="modal" id="detail-content"></div>
+</div>
+
+<script>
+const SOURCES=['Contact Form','LinkedIn','Referral','Cold Email','Website Chat','Advertisement','Event'];
+const COLORS=['#6c63ff','#10b981','#f59e0b','#f43f5e','#3b82f6','#14b8a6','#ec4899'];
+const AVATAR_COLORS=['#6c63ff','#f43f5e','#10b981','#f59e0b','#3b82f6','#14b8a6'];
+let leads=[], filter='all', sortMode=0, editId=null;
+const SORTS=['Newest','Oldest','Highest Score','Name A-Z'];
+
+function uid(){return Math.random().toString(36).slice(2,10)}
+function initials(n){return n.split(' ').map(x=>x[0]).join('').toUpperCase().slice(0,2)}
+function avatarColor(n){return AVATAR_COLORS[n.charCodeAt(0)%AVATAR_COLORS.length]}
+function fmt(d){return new Date(d).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'2-digit'})}
+function score(l){let s=40;if(l.company)s+=15;if(l.phone)s+=10;if(l.status==='contacted')s+=15;if(l.status==='converted')s+=35;if(l.status==='lost')s-=10;return Math.min(100,Math.max(5,s+Math.floor(l._rand*20)))}
+function scoreColor(s){return s>=80?'#10b981':s>=50?'#f59e0b':'#f43f5e'}
+
+function seed(){
+  const names=[['Arjun Mehta','arjun@techinno.in','TechInno Pvt'],['Priya Kapoor','priya.k@brandly.com','Brandly Studio'],['Rohan Desai','rohan@growthco.in','GrowthCo'],['Sneha Iyer','sneha.iyer@nexasoft.io','NexaSoft'],['Vikram Nair','vikram@startupx.in','StartupX'],['Kavya Reddy','kavya@marketpro.in','MarketPro'],['Aditya Joshi','adi.j@cloudbase.io','CloudBase'],['Meera Pillai','meera@designwave.in','DesignWave']];
+  const statuses=['new','new','contacted','contacted','converted','lost'];
+  leads=names.map(([n,e,c],i)=>({id:uid(),name:n,email:e,company:c,phone:'+91 9'+(Math.random()*1e9|0).toString().padStart(9,'0'),source:SOURCES[i%SOURCES.length],status:statuses[i%statuses.length],notes:[{id:uid(),text:'Initial contact established via website form.',date:new Date(Date.now()-864e5*3).toISOString()}],created:new Date(Date.now()-864e5*(8-i)).toISOString(),activity:[{a:'Lead created',t:new Date(Date.now()-864e5*(8-i)).toISOString()}],_rand:Math.random()}));
+}
+
+function renderStats(){
+  const tot=leads.length,nw=leads.filter(l=>l.status==='new').length,conv=leads.filter(l=>l.status==='converted').length,rate=tot?Math.round(conv/tot*100):0;
+  document.getElementById('total-badge').textContent=tot;
+  document.getElementById('stats-grid').innerHTML=`
+    <div class="stat-card purple"><div class="stat-top"><div class="stat-icon purple">📋</div><span class="stat-delta delta-up">↑ 12%</span></div><div class="stat-num">${tot}</div><div class="stat-label">Total Leads</div></div>
+    <div class="stat-card green"><div class="stat-top"><div class="stat-icon green">✅</div><span class="stat-delta delta-up">↑ 8%</span></div><div class="stat-num">${conv}</div><div class="stat-label">Converted</div></div>
+    <div class="stat-card gold"><div class="stat-top"><div class="stat-icon gold">🎯</div><span class="stat-delta delta-up">↑ 3%</span></div><div class="stat-num">${rate}%</div><div class="stat-label">Conversion Rate</div></div>
+    <div class="stat-card coral"><div class="stat-top"><div class="stat-icon coral">🔵</div><span class="stat-delta delta-up">+${nw}</span></div><div class="stat-num">${nw}</div><div class="stat-label">New This Week</div></div>`;
+}
+
+function getFiltered(){
+  let arr=filter==='all'?[...leads]:leads.filter(l=>l.status===filter);
+  const q=document.getElementById('search-input').value.toLowerCase();
+  if(q)arr=arr.filter(l=>l.name.toLowerCase().includes(q)||l.email.toLowerCase().includes(q)||(l.company||'').toLowerCase().includes(q));
+  if(sortMode===0)arr.sort((a,b)=>new Date(b.created)-new Date(a.created));
+  else if(sortMode===1)arr.sort((a,b)=>new Date(a.created)-new Date(b.created));
+  else if(sortMode===2)arr.sort((a,b)=>score(b)-score(a));
+  else arr.sort((a,b)=>a.name.localeCompare(b.name));
+  return arr;
+}
+
+function renderLeads(){
+  const arr=getFiltered(),body=document.getElementById('leads-body');
+  if(!arr.length){body.innerHTML=`<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-text">No leads found</div><div class="empty-sub">Try adjusting your filters or add a new lead</div></div>`;return;}
+  body.innerHTML=arr.map(l=>{
+    const s=score(l),sc=scoreColor(s),ac=avatarColor(l.name),init=initials(l.name);
+    return `<div class="lead-row" onclick="openDetail('${l.id}')">
+      <div class="lead-name"><div class="lead-avatar" style="background:${ac}">${init}</div><div><div class="lead-name-text">${l.name}</div><div class="lead-email">${l.email}</div></div></div>
+      <div class="lead-company">${l.company||'—'}<br><span style="font-size:11px;color:var(--text3)">${l.phone||''}</span></div>
+      <div><span class="source-tag">${l.source}</span></div>
+      <div><span class="badge badge-${l.status}">${l.status.charAt(0).toUpperCase()+l.status.slice(1)}</span></div>
+      <div class="score-bar"><div class="score-track"><div class="score-fill" style="width:${s}%;background:${sc}"></div></div><span class="score-num">${s}</span></div>
+      <div class="date-cell">${fmt(l.created)}</div>
+      <div class="action-btns" onclick="event.stopPropagation()">
+        <div class="icon-btn" onclick="openEdit('${l.id}')" title="Edit">✏️</div>
+        <div class="icon-btn" onclick="deleteLead('${l.id}')" title="Delete" style="--accent3:var(--coral);--accent:var(--coral2)">🗑</div>
+      </div>
+    </div>`;}).join('');
+}
+
+function render(){renderStats();renderLeads();}
+
+function setFilter(f,el){
+  filter=f;
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  if(el)el.classList.add('active');
+  renderLeads();
+}
+
+function applyFilters(){renderLeads();}
+
+function cycleSort(){
+  sortMode=(sortMode+1)%SORTS.length;
+  document.getElementById('sort-label').textContent=SORTS[sortMode];
+  renderLeads();
+}
+
+function openAddModal(){
+  editId=null;
+  document.getElementById('modal-title').textContent='Add New Lead';
+  document.getElementById('modal-sub').textContent='Fill in the lead details below';
+  ['name','company','email','phone','note'].forEach(k=>document.getElementById('f-'+k).value='');
+  document.getElementById('f-source').value='Contact Form';
+  document.getElementById('f-status').value='new';
+  document.getElementById('form-modal').style.display='flex';
+}
+
+function openEdit(id){
+  const l=leads.find(x=>x.id===id);if(!l)return;
+  editId=id;
+  document.getElementById('modal-title').textContent='Edit Lead';
+  document.getElementById('modal-sub').textContent='Update the lead information';
+  document.getElementById('f-name').value=l.name;
+  document.getElementById('f-company').value=l.company||'';
+  document.getElementById('f-email').value=l.email;
+  document.getElementById('f-phone').value=l.phone||'';
+  document.getElementById('f-source').value=l.source;
+  document.getElementById('f-status').value=l.status;
+  document.getElementById('f-note').value='';
+  document.getElementById('form-modal').style.display='flex';
+}
+
+function saveLead(){
+  const name=document.getElementById('f-name').value.trim();
+  const email=document.getElementById('f-email').value.trim();
+  if(!name||!email){showToast('⚠️','Name and Email are required.');return;}
+  const note=document.getElementById('f-note').value.trim();
+  if(editId){
+    const l=leads.find(x=>x.id===editId);
+    if(!l)return;
+    const prev=l.status;
+    l.name=name;l.company=document.getElementById('f-company').value.trim();l.email=email;l.phone=document.getElementById('f-phone').value.trim();l.source=document.getElementById('f-source').value;l.status=document.getElementById('f-status').value;
+    if(note)l.notes.unshift({id:uid(),text:note,date:new Date().toISOString()});
+    if(prev!==l.status)l.activity.unshift({a:`Status changed to ${l.status}`,t:new Date().toISOString()});
+    showToast('✅','Lead updated successfully!');
+  } else {
+    const nl={id:uid(),name,email,company:document.getElementById('f-company').value.trim(),phone:document.getElementById('f-phone').value.trim(),source:document.getElementById('f-source').value,status:document.getElementById('f-status').value,notes:note?[{id:uid(),text:note,date:new Date().toISOString()}]:[],created:new Date().toISOString(),activity:[{a:'Lead created',t:new Date().toISOString()}],_rand:Math.random()};
+    leads.unshift(nl);
+    showToast('🎉','New lead added!');
+  }
+  closeModal('form-modal');render();
+}
+
+function deleteLead(id){
+  if(!confirm('Delete this lead?'))return;
+  leads=leads.filter(l=>l.id!==id);
+  render();showToast('🗑','Lead deleted.');
+}
+
+function openDetail(id){
+  const l=leads.find(x=>x.id===id);if(!l)return;
+  const s=score(l),sc=scoreColor(s),ac=avatarColor(l.name);
+  document.getElementById('detail-content').innerHTML=`
+    <div class="modal-head" style="border-bottom:1px solid var(--border);padding-bottom:20px;margin-bottom:0">
+      <div style="display:flex;align-items:center;gap:14px">
+        <div class="lead-avatar" style="background:${ac};width:48px;height:48px;font-size:16px;border-radius:14px">${initials(l.name)}</div>
+        <div>
+          <div class="modal-title">${l.name}</div>
+          <div class="modal-sub">${l.email} · ${l.company||'—'}</div>
+        </div>
+      </div>
+      <button class="close-btn" onclick="closeModal('detail-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="section-label">Update Status</div>
+      <div class="status-select-row">
+        ${['new','contacted','converted','lost'].map(st=>`<div class="status-opt ${st}${l.status===st?' sel':''}" onclick="changeStatus('${l.id}','${st}',this)">${st.charAt(0).toUpperCase()+st.slice(1)}</div>`).join('')}
+      </div>
+      <div class="detail-grid">
+        <div class="detail-item"><div class="detail-label">📞 Phone</div><div class="detail-value">${l.phone||'—'}</div></div>
+        <div class="detail-item"><div class="detail-label">📡 Source</div><div class="detail-value">${l.source}</div></div>
+        <div class="detail-item"><div class="detail-label">📅 Added</div><div class="detail-value">${fmt(l.created)}</div></div>
+        <div class="detail-item"><div class="detail-label">💯 Score</div><div class="detail-value" style="color:${sc}">${s}/100</div></div>
+      </div>
+      <div class="section-label">Notes & Follow-ups</div>
+      <div class="notes-list">${l.notes.length?l.notes.map(n=>`<div class="note-item"><div class="note-date">${fmt(n.date)}</div><div class="note-text">${n.text}</div></div>`).join(''):'<div style="color:var(--text3);font-size:13px;padding:10px 0">No notes yet.</div>'}</div>
+      <div style="display:flex;gap:8px;margin-bottom:20px">
+        <input class="form-input" style="flex:1" id="note-inp-${l.id}" placeholder="Add a note or follow-up…" onkeydown="if(event.key==='Enter')addNote('${l.id}')"/>
+        <button class="btn btn-primary" onclick="addNote('${l.id}')">Add</button>
+      </div>
+      <div class="section-label">Activity</div>
+      <div class="activity-timeline">${l.activity.slice(0,8).map(a=>`<div class="timeline-item"><div class="timeline-dot"></div><div><div class="timeline-text">${a.a}</div><div class="timeline-time">${fmt(a.t)}</div></div></div>`).join('')}</div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('detail-modal')">Close</button><button class="btn btn-primary" onclick="closeModal('detail-modal');openEdit('${l.id}')">✏️ Edit Lead</button></div>`;
+  document.getElementById('detail-modal').style.display='flex';
+}
+
+function changeStatus(id,st,el){
+  const l=leads.find(x=>x.id===id);if(!l||l.status===st)return;
+  l.status=st;
+  l.activity.unshift({a:`Status changed to ${st}`,t:new Date().toISOString()});
+  el.closest('.status-select-row').querySelectorAll('.status-opt').forEach(e=>e.classList.remove('sel'));
+  el.classList.add('sel');
+  render();showToast('✅',`Status → ${st}`);
+}
+
+function addNote(id){
+  const l=leads.find(x=>x.id===id);if(!l)return;
+  const inp=document.getElementById('note-inp-'+id);
+  const txt=inp.value.trim();if(!txt){showToast('⚠️','Please type a note first.');return;}
+  l.notes.unshift({id:uid(),text:txt,date:new Date().toISOString()});
+  l.activity.unshift({a:'Note added',t:new Date().toISOString()});
+  inp.value='';
+  openDetail(id);render();showToast('📝','Note saved!');
+}
+
+function closeModal(id){document.getElementById(id).style.display='none';}
+function closeOnBg(e,id){if(e.target.id===id)closeModal(id);}
+function setView(v){document.querySelectorAll('.nav-item').forEach((n,i)=>n.classList.toggle('active',['leads','analytics','contacts','settings'][i]===v));if(v!=='leads')showToast('🚧','Coming soon — Lead Pipeline is live!');}
+
+let toastTimer;
+function showToast(icon,msg){
+  let t=document.querySelector('.toast');if(t)t.remove();
+  t=document.createElement('div');t.className='toast';t.innerHTML=`<span class="toast-icon">${icon}</span>${msg}`;
+  document.body.appendChild(t);clearTimeout(toastTimer);toastTimer=setTimeout(()=>t&&t.remove(),2800);
+}
+
+function exportCSV(){
+  const rows=[['Name','Email','Company','Phone','Source','Status','Created'],...leads.map(l=>[l.name,l.email,l.company||'',l.phone||'',l.source,l.status,fmt(l.created)])];
+  const csv=rows.map(r=>r.map(c=>`"${c}"`).join(',')).join('\n');
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='leads_export.csv';a.click();
+  showToast('⬇️','Export downloaded!');
+}
+
+seed();render();
+</script>
+</body>
+</html>
